@@ -1,25 +1,28 @@
 <script setup lang="ts">
 import router from '@/router';
+import { useUserStore } from '@/stores/user';
 import axios from 'axios';
 import { ref } from 'vue';
+import { useCookies } from 'vue3-cookies';
 
 const count = ref()
 let message:any = ref();
 let nickcheck:any = ref("");
-
+const { cookies } = useCookies();
 
 async function checkValid() {
   let nickname = message;
   await axios
-    .post("/api/users/nickname", { nickname: nickname }, 
+    .post("/api/users/nickname", { nickname: nickname.value }, 
     { 
       headers: {
-        Authorization: `Bearer ` + localStorage.getItem('accesstoken')
+        Authorization: `Bearer ` + cookies.get('jwt'),
       }
     })
     .then(
       (res) => {
           console.log(res);
+          useUserStore().data.nickname = nickname.value;
           router.push('/test');
         }
     )

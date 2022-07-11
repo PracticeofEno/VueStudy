@@ -4,25 +4,30 @@ import axios from "axios";
 import { useRoute } from "vue-router";
 import router from "@/router";
 import { useUserStore } from "@/stores/user";
+import { useCookies } from 'vue3-cookies';
 
 const currentRoute = useRoute();
+const { cookies } = useCookies();
 let store = useUserStore();
+
 
 onBeforeMount(() => {
   axios.post("/api/auth", { code: currentRoute.query.code })
     .then(
       (res) => {
+        console.log(cookies.get("jwt"));
         localStorage.setItem("accesstoken", res.data.jwt);
 
         axios.get("/api/users", {
           headers: {
-            Authorization: `Bearer ` + localStorage.getItem("accesstoken")
+            Authorization: `Bearer ` + cookies.get('jwt'),
           }
         })
         .then((res) => {
           console.log("Auth OK - AuthView");
           let store = useUserStore();
           store.data = res.data;
+          store.data.avatarPath = "http://localhost:7000/"+store.data.avatarPath;
           store.login = true;
           console.log(res.data);
           if (res.data.nickname == "")
@@ -45,7 +50,7 @@ onBeforeMount(() => {
 
 <template>
   <div>
-    <h1>This is an Auth page {{ currentRoute.query.code }}</h1>
+    <h1>This is an Auth page </h1>
   </div>
 </template>
 

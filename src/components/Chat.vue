@@ -1,42 +1,31 @@
 <script setup lang="ts">
-import { onBeforeMount, onBeforeUnmount } from "@vue/runtime-core";
+import { useUserStore } from "@/stores/user";
 import io from "socket.io-client"
+import { ref } from "vue";
 
-const props = defineProps<{
-  msg: any;
-}>()
-
+let store = useUserStore();
+let message = ref("");
 let socket: any;
-let message: any;
+let items = ref([]);
 
-onBeforeMount(async () => { 
-    socket = props.msg;
-    socket.on('connect', function() {
-        console.log('Connected');
-        socket.emit('events', { test: 'test' });
-        socket.emit('identity', 999, response =>
-          console.log('Identity:', response),
-        );
-      });
-    socket.on('events', function(data) {
-        console.log('event', data);
+socket = io('http://localhost:7000');
+socket.emit('join', 'join_data');
+socket.on('connect', () => {
+    /* 누군가 채팅침 */
+    socket.on('message', (data) => {
+        console.log(data);
+        items.value.push(data.nickname + ": " + data.message);
     });
-})
+});
 
 async function chatSend() {
-    console.log("chatsend start");
-    socket = props.msg;
-    socket.on('connect', function() {
-        console.log('Connected');
-        socket.emit('events', { test: 'test' });
-        socket.emit('identity', 999, response =>
-          console.log('Identity:', response),
-        );
-      });
-    socket.on('events', function(data) {
-        console.log('event', data);
-    });
-    console.log("chatsend end");
+    console.log(items);
+    console.log( { nickname: store.data.nickname, message: message.value} );
+    socket.emit('send', { nickname: store.data.nickname, message: message.value}, response => 
+        {
+          console.log('send:', response);
+        },
+    );
 }
 
 </script>
@@ -46,20 +35,8 @@ async function chatSend() {
         <div class="live_right_box">
             <div class="liveTabCon_font_size_14">
                 <div class="castChat" style="height: calc(100% - 196px);">
-                    <div>
-                        <div class="cht_al cht_al_co cht_al_4">
-                            <div class="cht_box">abcedef</div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="cht_al cht_al_co cht_al_5">
-                            <div class="cht_box">haha.</div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="cht_al cht_al_1">
-                            <div class="cht_box">cc.</div>
-                        </div>
+                    <div v-for="item in items">
+                        {{ item }}
                     </div>
                 </div>
                 <div class="cht_effect">

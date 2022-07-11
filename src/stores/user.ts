@@ -9,6 +9,9 @@ export type UserType = {
   lose: number;
   admin: Boolean;
   avatarPath: string;
+  twoFactorAuthenticationSecret: string,
+  isTwoFactorAuthenticationEnabled: boolean,
+  lating: number,
 };
 
 export const useUserStore = defineStore({
