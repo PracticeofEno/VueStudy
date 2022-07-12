@@ -1,21 +1,23 @@
 <script setup lang="ts">
-import { onBeforeMount } from "vue";
-import axios from "axios";
-import { useRoute } from "vue-router";
 import router from "@/router";
 import { useUserStore } from "@/stores/user";
+import axios from "axios";
+import { ref } from "vue";
 import { useCookies } from 'vue3-cookies';
 
-const currentRoute = useRoute();
+
+let qrCodeText = ref();
 const { cookies } = useCookies();
 let store = useUserStore();
 
+async function twoFactorAuthentication() {
+    axios.post("/api/auth/two", { code: qrCodeText.value }, {
+        headers: {
+            Authorization: `Bearer ` + cookies.get('jwt'),
+        },
+    })
+    .then((res) => {
 
-onBeforeMount(() => {
-  axios.post("/api/auth", { code: currentRoute.query.code })
-    .then(
-      (res) => {
-        console.log(cookies.get("jwt"));
         axios.get("/api/users", {
           headers: {
             Authorization: `Bearer ` + cookies.get('jwt'),
@@ -26,7 +28,6 @@ onBeforeMount(() => {
           let store = useUserStore();
           store.data = res.data;
           store.login = true;
-          console.log(res.data);
           if (res.data.nickname == "")
             router.push('/signup');
           else
@@ -42,18 +43,23 @@ onBeforeMount(() => {
             console.log("/api/users error");  
           }
         })
-      }
-    )
-    .catch(
-      (error) => {
-        console.log(error);
-      });
-});
+        router.push('/');
+    })
+    .catch(error => {
+         console.log(`api /auth/two error`);
+    })
+
+}
 </script>
 
 <template>
-  <div>
-    <h1>This is an Auth page </h1>
-  </div>
+    <div>
+        <input type="text" v-model="qrCodeText" />
+        <input type="button" value="전송" @click="twoFactorAuthentication" />
+    </div>
+
 </template>
 
+<style scoped>
+@media (min-width: 1024px) {}
+</style>

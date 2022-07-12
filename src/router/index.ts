@@ -4,6 +4,7 @@ import AuthView from "../views/AuthView.vue";
 import SignUp from "../views/SignUp.vue"
 import Info from "../views/Info.vue"
 import { useUserStore } from "@/stores/user";
+import TwoFactor from "@/views/TwoFactor.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,6 +28,11 @@ const router = createRouter({
       path: "/info",
       name: "info",
       component: Info,
+    },
+    {
+      path: "/twoFactor",
+      name: "twoFactor",
+      component: TwoFactor,
     },
     {
       path: "/about",

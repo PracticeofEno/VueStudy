@@ -5,25 +5,60 @@ import axios from 'axios';
 import { onBeforeMount, ref } from 'vue';
 import { useCookies } from 'vue3-cookies';
 import QrcodeVue from 'qrcode.vue'
+export type UserType = {
+  id: string;
+  nickname: string;
+  win: number;
+  lose: number;
+  admin: Boolean;
+  avatarPath: string;
+  twoFactorAuthenticationSecret: string,
+  isTwoFactorAuthenticationEnabled: boolean,
+  lating: number,
+};
 
 let store = useUserStore();
 let id_validate = ref(true);
 let selectFile = ref();
 let nickname = ref();
 let leftval = ref("");
-let twoFactor1 = ref();
+let twoFactor1 = ref(false);
+let twoFactor11 = ref(true);
 let qrValue = ref();
 let qrCodeText=ref();
 let twoFactor2 = ref();
 let backval = ref();
 const { cookies } = useCookies();
+let user = ref();
 
 onBeforeMount(async () => {
-  nickname.value = store.data.nickname;
-  twoFactor1.value = store.data.isTwoFactorAuthenticationEnabled;
-  console.log(store.data.avatarPath);
+  axios.get("/api/users", {
+        headers: {
+          Authorization: `Bearer ` + cookies.get('jwt'),
+        },
+      })
+    .then(res => {
+      user.value = res.data;
+      user.value.avatarPath = "http://localhost:7000/" + res.data.avatarPath;
+      console.log(user.value);
+      if (user.value.isTwoFactorAuthenticationEnabled)
+      {
+        leftval.value = "40px";
+        backval.value = '#53FF4C';
+        twoFactor2.value = true;
+        twoFactor1.value = true;
+        twoFactor11.value = false;
+      }
+      nickname.value = res.data.nickname;
+    })
+    .catch(error => {
+        console.log(error);
+        console.log(`api GET /users error`);
+    })
+  
 })
 
+/* png로 받아서 QRcode uri src 만드는건데 개삽질한거임 필요없지만 놔둠
 function _arrayBufferToBase64( buffer : any) {
     var binary = '';
     var bytes = new Uint8Array( buffer );
@@ -33,6 +68,7 @@ function _arrayBufferToBase64( buffer : any) {
     }
     return window.btoa( binary );
 }
+*/
 
 async function updateUserData() {
   console.log(nickname);
@@ -46,7 +82,7 @@ async function updateUserData() {
     .then((res) => {
       console.log(res);
       console.log("send updateUserData Succcess");
-      store.data.nickname = nickname.value;
+      user.value.nickname = nickname.value;
     })
     .catch((error) => {
       console.log(error);
@@ -71,8 +107,8 @@ async function updateAvatar() {
         },
       })
     .then(res => {
-        store.data.avatarPath = "about:blank";
-        setTimeout(() => { store.data.avatarPath = "http://localhost:7000/" + res.data }, 0)
+        user.value.avatarPath = "about:blank";
+        setTimeout(() => { user.value.avatarPath = "http://localhost:7000/" + res.data }, 0)
         console.log("ok");
     })
     .catch(error => {
@@ -93,21 +129,10 @@ async function twoFAClick() {
         headers: {
           Authorization: `Bearer ` + cookies.get('jwt'),
         },
-        //responseType: 'arraybuffer',
       })
     .then(res => {
       qrValue.value = res.data;
       twoFactor1.value = true;
-
-      /*
-      qrValue.value = _arrayBufferToBase64(res.data);
-      console.log(qrValue);
-      twoFactor.value = true;
-      */
-      /*
-      leftval.value = "40px";
-      backval.value = '#53FF4C';
-      */
     })
     .catch(error => {
         console.log(error);
@@ -151,7 +176,7 @@ async function twoFactorAuthentication() {
 
 <template>
   <div class="box" style="background: #BDBDBD;">
-    <img class="profile" :src="store.data.avatarPath">
+    <img class="profile" :src="user.avatarPath">
   </div>
   <h2 class="title">기본정보 수정</h2>
   <table class="userDataTable">
@@ -167,11 +192,11 @@ async function twoFactorAuthentication() {
       </tr><!-- 첫번째 줄 끝 -->
       <tr>
         <th class="row"> 승 </th>
-        <td> {{ store.data.win }} </td>
+        <td> {{ user.win }} </td>
       </tr>
       <tr>
         <th class="row"> 패 </th>
-        <td> {{ store.data.lose }} </td>
+        <td> {{ user.lose }} </td>
       </tr>
       <tr>
         <th class="row"> 아바타 </th>
@@ -192,7 +217,7 @@ async function twoFactorAuthentication() {
         </td>
 
       </tr>
-      <tr v-if="twoFactor1">
+      <tr v-if="twoFactor1 && twoFactor11">
         <th class="row"> <qrcode-vue :value="qrValue"></qrcode-vue></th>
           <!-- 시발..삽질..<img :src="'data:image/jpeg;base64,'+qrValue"/></th>-->
         <td>
