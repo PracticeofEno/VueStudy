@@ -32,7 +32,7 @@ const { cookies } = useCookies();
 let user = ref();
 
 onBeforeMount(async () => {
-  axios.get("/api/users", {
+  await axios.get("/api/users", {
         headers: {
           Authorization: `Bearer ` + cookies.get('jwt'),
         },
@@ -107,8 +107,8 @@ async function updateAvatar() {
         },
       })
     .then(res => {
-        user.value.avatarPath = "about:blank";
-        setTimeout(() => { user.value.avatarPath = "http://localhost:7000/" + res.data }, 0)
+        store.data.avatarPath = "about:blank";
+        setTimeout(() => { store.data.avatarPath = "http://localhost:7000/" + res.data }, 0)
         console.log("ok");
     })
     .catch(error => {
@@ -176,7 +176,7 @@ async function twoFactorAuthentication() {
 
 <template>
   <div class="box" style="background: #BDBDBD;">
-    <img class="profile" :src="user.avatarPath">
+    <img class="profile" :src="store.data.avatarPath">
   </div>
   <h2 class="title">기본정보 수정</h2>
   <table class="userDataTable">
@@ -192,11 +192,11 @@ async function twoFactorAuthentication() {
       </tr><!-- 첫번째 줄 끝 -->
       <tr>
         <th class="row"> 승 </th>
-        <td> {{ user.win }} </td>
+        <td> {{ store.data.win }} </td>
       </tr>
       <tr>
         <th class="row"> 패 </th>
-        <td> {{ user.lose }} </td>
+        <td> {{ store.data.lose }} </td>
       </tr>
       <tr>
         <th class="row"> 아바타 </th>

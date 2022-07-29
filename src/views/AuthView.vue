@@ -12,7 +12,7 @@ let store = useUserStore();
 
 
 onBeforeMount(() => {
-  axios.post("/api/auth", { code: currentRoute.query.code })
+  axios.post("/api/users/login", { code: currentRoute.query.code })
     .then(
       (res) => {
         console.log(cookies.get("jwt"));
@@ -25,6 +25,7 @@ onBeforeMount(() => {
           console.log("Auth OK - AuthView");
           let store = useUserStore();
           store.data = res.data;
+          store.data.avatarPath = "http://localhost:7000/" + res.data.avatarPath;
           store.login = true;
           console.log(res.data);
           if (res.data.nickname == "")
@@ -56,4 +57,3 @@ onBeforeMount(() => {
     <h1>This is an Auth page </h1>
   </div>
 </template>
-

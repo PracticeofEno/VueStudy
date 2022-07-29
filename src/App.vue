@@ -16,9 +16,7 @@ let store = useUserStore();
   <div v-else> 로그인이 필요합니다</div>
   <AppNav v-if="store.login"/>
   <RouterView />
-  <!--
-    <Chat />
-  !-->
+    <!--<Chat v-if="store.login"/> -->
 </template>
 
 <style>

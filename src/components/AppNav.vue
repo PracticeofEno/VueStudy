@@ -7,7 +7,7 @@ import router from '@/router';
   <header>
       <nav>
         <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/">채널</RouterLink>
+        <RouterLink to="/rank">랭킹</RouterLink>
         <RouterLink to="/">대전</RouterLink>
         <RouterLink to="/">전적</RouterLink>
         <RouterLink to="/info">내정보</RouterLink>
